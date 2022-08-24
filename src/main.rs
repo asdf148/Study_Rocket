@@ -1,5 +1,11 @@
 #[macro_use] extern crate rocket;
+#[macro_use] extern crate diesel;
+extern crate dotenv;
+
 mod users;
+mod database;
+use diesel::prelude::*;
+
 // #[cfg(test)] mod tests;
 
 #[derive(FromFormField)]
@@ -73,8 +79,26 @@ fn hello(lang: Option<Lang>, opt: Options<'_>) -> String {
     greeting
 }
 
+// diesel 연결
+use diesel::prelude::*;
+use dotenv::dotenv;
+use std::env;
+
+pub fn establish_connection() -> MysqlConnection {
+    dotenv().ok();
+
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    MysqlConnection::establish(&database_url)
+        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
+}
+
+use database::schema::user::users::dsl::*;
+use database::schema::post::posts::dsl::*;
+use database::schema::comment::comments::dsl::*;
+
 #[launch]
 fn rocket() -> _ {
+    
     rocket::build()
         .mount("/", routes![hello])
         .mount("/auth", routes![join])
