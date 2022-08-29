@@ -1,9 +1,9 @@
 table! {
     posts (id) {
-        id -> Integer,
-        image -> Varchar,
-        title -> Varchar,
+        id -> Int4,
+        image -> VarChar,
+        title -> Nullable<Varchar>,
         content -> Text,
-        user_id -> Integer,
+        user_id -> Int4,
     }
 }

@@ -4,7 +4,8 @@ extern crate dotenv;
 
 mod users;
 mod database;
-use diesel::prelude::*;
+
+use users::controller;
 
 // #[cfg(test)] mod tests;
 
@@ -21,14 +22,6 @@ enum Lang {
 struct Options<'r> {
     emoji: bool,
     name: Option<&'r str>,
-}
-
-// Try visiting:
-//   http://127.0.0.1:8000/hello/world
-#[get("/join")]
-fn join() -> &'static str {
-    users::controller::join();
-    "test"
 }
 
 // Try visiting:
@@ -79,29 +72,11 @@ fn hello(lang: Option<Lang>, opt: Options<'_>) -> String {
     greeting
 }
 
-// diesel 연결
-use diesel::prelude::*;
-use dotenv::dotenv;
-use std::env;
-
-pub fn establish_connection() -> MysqlConnection {
-    dotenv().ok();
-
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    MysqlConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
-}
-
-use database::schema::user::users::dsl::*;
-use database::schema::post::posts::dsl::*;
-use database::schema::comment::comments::dsl::*;
-
 #[launch]
 fn rocket() -> _ {
-    
     rocket::build()
         .mount("/", routes![hello])
-        .mount("/auth", routes![join])
+        .mount("/auth", routes![controller::join])
         .mount("/hello", routes![mir])
         .mount("/wave", routes![wave])
 }
